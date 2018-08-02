@@ -21,6 +21,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -35,6 +37,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private double longitude;
     private double latitude;
     private GoogleApiClient googleApiClient;
+    FusedLocationProviderClient mFusedLocationClient;
 
 
     @Override
@@ -84,15 +87,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        if (location != null) {
-            //Getting longitude and latitude
-            longitude = location.getLongitude();
-            latitude = location.getLatitude();
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-            //moving the map to location
-            moveMap();
-        }
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations, this can be null.
+                        if (location != null) {
+                            longitude = location.getLongitude();
+                            latitude = location.getLatitude();
+
+                            moveMap();
+                        }
+                    }
+                });
     }
 
     private void moveMap() {

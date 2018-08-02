@@ -39,8 +39,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         // Add a marker in Riga and move the camera
-        LatLng riga = new LatLng(40.284216, -84.155499);
-        mMap.addMarker(new MarkerOptions().position(riga).title("Marker in Sidney"));
+        LatLng riga = new LatLng(51.507351, -0.127758);
+        mMap.addMarker(new MarkerOptions().position(riga).title("Marker in London"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(riga));
     }
 }
