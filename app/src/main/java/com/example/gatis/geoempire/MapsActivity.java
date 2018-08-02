@@ -1,191 +1,242 @@
 package com.example.gatis.geoempire;
 
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
+import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
-
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.app.FragmentActivity;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.maps.SupportMapFragment;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+
+// Since it’s the easiest way of adding a map to your project, I’m going to stick with using
+// a MapFragment//
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        GoogleMap.OnMarkerDragListener,
-        GoogleMap.OnMapLongClickListener,
-        GoogleMap.OnMarkerClickListener,
-        View.OnClickListener {
-
-    private static final String TAG = "MapsActivity";
+        GoogleApiClient.ConnectionCallbacks, LocationListener {
     private GoogleMap mMap;
-    private double longitude;
-    private double latitude;
-    private GoogleApiClient googleApiClient;
-    FusedLocationProviderClient mFusedLocationClient;
+    GoogleApiClient mGoogleApiClient;
+    Marker mLocationMarker;
+    Location mLastLocation;
+    LocationRequest mLocationRequest;
 
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override   protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
 
-        //Initializing googleApiClient
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
+        /*
+        if (Build.VERSION.SDK_INT & gt; = Build.VERSION_CODES.M) {
+            checkLocationPermission();
+        }
+        */
+        //todo: I commented out previous code due to wrong code ad set condition to true
+        if (true) {
+            checkLocationPermission();
+        }
+
+
+        SupportMapFragment mapFragment =
+                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
 
+    public boolean checkLocationPermission() {
+        // In Android 6.0 and higher you need to request permissions at runtime, and the user has
+        // the ability to grant or deny each permission. Users can also revoke a previously-granted
+        // permission at any time, so your app must always check that it has access to each
+        // permission, before trying to perform actions that require that permission. Here, we’re using
+        // ContextCompat.checkSelfPermission to check whether this app currently has the
+        // ACCESS_COARSE_LOCATION permission
+
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                // If your app does have access to COARSE_LOCATION, then this method will return
+                // PackageManager.PERMISSION_GRANTED//
+                != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                // If your app doesn’t have this permission, then you’ll need to request it by calling
+                // the ActivityCompat.requestPermissions method//
+                requestPermissions(new String[] {
+                                android.Manifest.permission.ACCESS_COARSE_LOCATION
+                        },
+                        MY_PERMISSIONS_REQUEST_LOCATION);
+            } else {
+                // Request the permission by launching Android’s standard permissions dialog.
+                // If you want to provide any additional information, such as why your app requires this
+                // particular permission, then you’ll need to add this information before calling
+                // requestPermission //
+                requestPermissions(new String[] {
+                                android.Manifest.permission.ACCESS_COARSE_LOCATION
+                        },
+                        MY_PERMISSIONS_REQUEST_LOCATION);
+            }
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    /*
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-        // googleMapOptions.mapType(googleMap.MAP_TYPE_HYBRID)
-        //    .compassEnabled(true);
+        // Specify what kind of map you want to display. In this example I’m sticking with the
+        // classic, “Normal” map
 
-        // Add a marker in Sydney and move the camera
-        LatLng india = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(india).title("Marker in India"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(india));
-        mMap.setOnMarkerDragListener(this);
-        mMap.setOnMapLongClickListener(this);
-    }
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
-    //Getting current location
-    private void getCurrentLocation() {
-        mMap.clear();
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+
+        if (Build.VERSION.SDK_INT & gt; = Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                buildGoogleApiClient();
+                // Although the user’s location will update automatically on a regular basis, you can also
+                // give your users a way of triggering a location update manually. Here, we’re adding a
+                // ‘My Location’ button to the upper-right corner of our app; when the user taps this button,
+                // the camera will update and center on the user’s current location//
+
+                mMap.setMyLocationEnabled(true);
+            }
         }
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+  else {
+            buildGoogleApiClient();
+            mMap.setMyLocationEnabled(true);
+        }
+    }
+    */
 
-        mFusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        // Got last known location. In some rare situations, this can be null.
-                        if (location != null) {
-                            longitude = location.getLongitude();
-                            latitude = location.getLatitude();
+    //todo: I commented out previous code due to wrong code ad set condition to true
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        // Specify what kind of map you want to display. In this example I’m sticking with the
+        // classic, “Normal” map
 
-                            moveMap();
-                        }
-                    }
-                });
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+
+
+        if (true) {
+            if (ContextCompat.checkSelfPermission(this,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                buildGoogleApiClient();
+                // Although the user’s location will update automatically on a regular basis, you can also
+                // give your users a way of triggering a location update manually. Here, we’re adding a
+                // ‘My Location’ button to the upper-right corner of our app; when the user taps this button,
+                // the camera will update and center on the user’s current location//
+
+                mMap.setMyLocationEnabled(true);
+            }
+        }
+  else {
+            buildGoogleApiClient();
+            mMap.setMyLocationEnabled(true);
+        }
     }
 
-    private void moveMap() {
-        /**
-         * Creating the latlng object to store lat, long coordinates
-         * adding marker to map
-         * move the camera with animation
-         */
-        LatLng latLng = new LatLng(latitude, longitude);
-        mMap.addMarker(new MarkerOptions()
-                .position(latLng)
-                .draggable(true)
-                .title("Marker in India"));
+    protected synchronized void buildGoogleApiClient() {
+        // Use the GoogleApiClient.Builder class to create an instance of the
+        // Google Play Services API client//
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addApi(LocationServices.API)
+                .build();
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
-        mMap.getUiSettings().setZoomControlsEnabled(true);
-
-
+        // Connect to Google Play Services, by calling the connect() method//
+        mGoogleApiClient.connect();
     }
 
     @Override
-    public void onClick(View view) {
-        Log.v(TAG,"view click event");
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        getCurrentLocation();
+    // If the connect request is completed successfully, the onConnected(Bundle) method
+    // will be invoked and any queued items will be executed//
+    public void onConnected(Bundle bundle) {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(2000);
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            // Retrieve the user’s last known location//
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
+                    mLocationRequest, this);
+        }
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-
     }
+
+    // Displaying multiple ‘current location’ markers is only going to confuse your users!
+    // To make sure there’s only ever one marker onscreen at a time, I’m using
+    // mLocationMarker.remove to clear all markers whenever the user’s location changes.
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    public void onLocationChanged(Location location) {
+        mLastLocation = location;
+        if (mLocationMarker != null) {
+            mLocationMarker.remove();
+        }
 
+        // To help preserve the device’s battery life, you’ll typically want to use
+        // removeLocationUpdates to suspend location updates when your app is no longer
+        // visible onscreen//
+        if (mGoogleApiClient != null) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        }
     }
+
+    // Once the user has granted or denied your permission request, the Activity’s
+    // onRequestPermissionsResult method will be called, and the system will pass
+    // the results of the ‘grant permission’ dialog, as an int//
 
     @Override
-    public void onMapLongClick(LatLng latLng) {
-        // mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(latLng).draggable(true));
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_LOCATION:
+            {
+
+                // If the request is cancelled, the result array will be empty (0)//
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // If the user has granted your permission request, then your app can now perform all its
+                    // location-related tasks, including displaying the user’s location on the map//
+                    if (ContextCompat.checkSelfPermission(this,
+                            android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        if (mGoogleApiClient == null) {
+                            buildGoogleApiClient();
+                        }
+                        mMap.setMyLocationEnabled(true);
+                    }
+                } else {
+                    // If the user has denied your permission request, then at this point you may want to
+                    // disable any functionality that depends on this permission//
+                }
+                return;
+            }
+        }
     }
-
-    @Override
-    public void onMarkerDragStart(Marker marker) {
-        Toast.makeText(MapsActivity.this, "onMarkerDragStart", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onMarkerDrag(Marker marker) {
-        Toast.makeText(MapsActivity.this, "onMarkerDrag", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onMarkerDragEnd(Marker marker) {
-        // getting the Co-ordinates
-        latitude = marker.getPosition().latitude;
-        longitude = marker.getPosition().longitude;
-
-        //move to current position
-        moveMap();
-    }
-
-    @Override
-    protected void onStart() {
-        googleApiClient.connect();
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        googleApiClient.disconnect();
-        super.onStop();
-    }
-
-
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        Toast.makeText(MapsActivity.this, "onMarkerClick", Toast.LENGTH_SHORT).show();
-        return true;
-    }
-
 }
