@@ -33,16 +33,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
 
 
-        /*
-        if (Build.VERSION.SDK_INT & gt; = Build.VERSION_CODES.M) {
-            checkLocationPermission();
-        }
-        */
-        //todo: I commented out previous code due to wrong code ad set condition to true
-        if (true) {
-            checkLocationPermission();
-        }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            checkLocationPermission();
+        }
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -98,7 +92,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onPause();
     }
 
-    /*
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -108,37 +102,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
 
-        if (Build.VERSION.SDK_INT & gt; = Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(this,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
-                buildGoogleApiClient();
-                // Although the user’s location will update automatically on a regular basis, you can also
-                // give your users a way of triggering a location update manually. Here, we’re adding a
-                // ‘My Location’ button to the upper-right corner of our app; when the user taps this button,
-                // the camera will update and center on the user’s current location//
-
-                mMap.setMyLocationEnabled(true);
-            }
-        }
-  else {
-            buildGoogleApiClient();
-            mMap.setMyLocationEnabled(true);
-        }
-    }
-    */
-
-    //todo: I commented out previous code due to wrong code ad set condition to true
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        // Specify what kind of map you want to display. In this example I’m sticking with the
-        // classic, “Normal” map
-
-        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-
-
-        if (true) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this,
                     android.Manifest.permission.ACCESS_COARSE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
