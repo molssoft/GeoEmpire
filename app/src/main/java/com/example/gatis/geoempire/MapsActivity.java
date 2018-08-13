@@ -18,6 +18,7 @@ import com.google.android.gms.location.LocationServices;
 
 // Since it’s the easiest way of adding a map to your project, I’m going to stick with using
 // a MapFragment//
+// testing git
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, LocationListener {
