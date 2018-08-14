@@ -50,7 +50,7 @@ public class TileOverlayDemoActivity extends AppCompatActivity
 
     @Override
     public void onMapReady(GoogleMap map) {
-        map.setMapType(GoogleMap.MAP_TYPE_NONE);
+        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
         TileProvider tileProvider = new UrlTileProvider(256, 256) {
             @Override
