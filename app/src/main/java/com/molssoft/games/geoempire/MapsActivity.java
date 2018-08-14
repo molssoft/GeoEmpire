@@ -1,4 +1,4 @@
-package com.molssoft.gatis.geoempire;
+package com.molssoft.games.geoempire;
 
 import android.support.v4.app.ActivityCompat;
 import android.os.Build;

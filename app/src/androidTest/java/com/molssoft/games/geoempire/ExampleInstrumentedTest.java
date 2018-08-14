@@ -1,4 +1,4 @@
-package com.molssoft.gatis.geoempire;
+package com.molssoft.games.geoempire;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
