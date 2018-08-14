@@ -1,4 +1,4 @@
-package com.example.gatis.geoempire;
+package com.molssoft.gatis.geoempire;
 
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;

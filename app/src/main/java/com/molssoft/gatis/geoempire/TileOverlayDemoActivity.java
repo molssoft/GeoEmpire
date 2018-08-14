@@ -1,4 +1,4 @@
-package com.example.gatis.geoempire;
+package com.molssoft.gatis.geoempire;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
